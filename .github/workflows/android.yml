@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
 
       # ----------------------------
-      # Python 3.10 (compatível Kivy)
+      # Python 3.10 (obrigatório p4a)
       # ----------------------------
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -22,7 +22,7 @@ jobs:
           python-version: "3.10"
 
       # ----------------------------
-      # Java 17 (OBRIGATÓRIO)
+      # Java 17 (sdkmanager exige)
       # ----------------------------
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -42,7 +42,6 @@ jobs:
             liblzma-dev zlib1g-dev \
             libncurses5 libncurses5-dev \
             libstdc++6 \
-            openjdk-17-jdk \
             build-essential \
             autoconf automake libtool pkg-config
 
@@ -55,7 +54,7 @@ jobs:
           pip install buildozer cython==0.29.36
 
       # ----------------------------
-      # Android SDK + NDK (correto)
+      # Android SDK (cmdline-tools)
       # ----------------------------
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -63,13 +62,20 @@ jobs:
           cmdline-tools-version: 12266719
 
       # ----------------------------
-      # Aceitar licenças Android
+      # Aceitar TODAS licenças
       # ----------------------------
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
       # ----------------------------
-      # LIMPEZA TOTAL (CRÍTICO)
+      # INSTALAR BUILD-TOOLS (🔥 FIX)
+      # ----------------------------
+      - name: Install Android Build Tools
+        run: |
+          sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2"
+
+      # ----------------------------
+      # Limpeza total (evita erros fantasmas)
       # ----------------------------
       - name: Clean Buildozer cache
         run: |
@@ -77,7 +83,7 @@ jobs:
           rm -rf ~/.buildozer
 
       # ----------------------------
-      # Build do APK
+      # Build APK
       # ----------------------------
       - name: Build Android APK
         env:
@@ -87,7 +93,7 @@ jobs:
           buildozer android debug
 
       # ----------------------------
-      # Publicar APK como Artifact
+      # Upload APK
       # ----------------------------
       - name: Upload APK
         uses: actions/upload-artifact@v4
